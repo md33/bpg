@@ -1,0 +1,35 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    title Хараагүй хүний хөтөч
+    link(rel='stylesheet', href='/stylesheets/bootstrap-3.3.5-dist/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/stylesheets/login.css')
+  body
+    #container
+      center
+        br
+        img#logo
+        p Хараагүй хүний хөтөч
+      .row
+        img#avatar
+        #panel
+          div
+            p Асран хамгаалагчийн систем 
+            br
+            form(action='/', method='POST')
+              input.log-text-form(type='text', name='username', value='', placeholder='Хэрэглэгчийн нэр')
+              br
+              input.log-text-form(type='password', name='password', value='', placeholder='Нууц үг')
+              br
+              input.log-btn-form(type='submit', value='Нэвтрэх')
+              br
+              br
+              a(href='index.html') Та нууц үгээ мартсан уу?
+              br
+              a(href='index.html') Бүртгүүлэх
+              br
+      #footer
+        center
+          p.footer-text Бүх эрх хуулиар хамгаалагдсан © 2015 Хуулбарлахыг хориглоно.

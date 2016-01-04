@@ -1,0 +1,381 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    title Хараагүй хүний хөтөч
+    link(rel='stylesheet', href='/stylesheets/bootstrap-3.3.5-dist/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    script(src='https://maps.googleapis.com/maps/api/js')
+  body(onload='init()')
+    #container
+      aside.col-md-3.col-xs-12.sidebar
+        .col-md-12.navbar-fixed-left
+          img#img-logo
+          span#app-name Хараагүй хүний хөтөч
+          span.fullscreen.glyphicon.glyphicon-menu-hamburger
+        .col-md-12.profile
+          .col-md-4
+            center
+              img.profile-image
+          .col-md-8
+            span
+              b #{admin.Lastname} #{admin.Firstname}
+            br
+            span.user-role АСРАН ХАМГААЛАГЧ
+            br
+            button.btn.btn-info.def-btn(type='button') ЗАСАХ
+        .col-md-12.user-info
+          center
+            span ИДЭВХИТЭЙ БАЙГАА ГИШҮҮН
+            br
+            .blind-user
+              svg(height='8', width='8')
+                circle(cx='4', cy='4', r='4', stroke='black', stroke-width='0', fill='#33FF66')
+              |         &nbspСонгогдоогүй
+        .drop-menu-btn
+          | Үндсэн цэс
+          span.glyphicon.glyphicon-menu-hamburger
+        .col-md-12.menu
+          ul
+            li
+              a(href='/home/0')
+                img.icon(src='../images/icon-1-none.png')
+                | Гишүүд
+            li.active
+              a(href='/overlook')
+                img.icon(src='../images/icon-2-active.png')
+                | Ажиглах
+            li
+              a(href='#')
+                img.icon(src='../images/icon-3-none.png')
+                | Цэс удирдах
+            li
+              a(href='#')
+                img.icon(src='../images/icon-4-none.png')
+                | Захидал
+            li
+              a(href='../intro')
+                img.icon(src='../images/icon-5-none.png')
+                | Танилцуулга   
+      .col-md-9.col-sm-10.col-xs-12.content
+        nav.navbar.navbar-fixed-top
+          .col-md-12.col-sm-12.col-xs-12.navbar-fixed-right.pull-right
+            .col-md-7.col-sm-5.col-xs-0
+            .col-md-5.col-sm-7.col-xs-12.text-right.head-settings
+              | 15:27 
+              span.silvertxt AM   
+              |  23 
+              span.silvertxt 10-Сар 2015 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              input#clsettings.set_icon(type='submit', value='Settings', name='', title='Тохиргоо', data-toggle='tooltip', data-placement='bottom')
+              input#cllogout.log_icon(type='submit', value='LogOut', name='', title='Гарах', data-toggle='tooltip', data-placement='bottom')
+        #sub-content.col-md-12.col-sm-12.col-xs-12
+          // User add Modal
+          #myModal1.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel')
+            .modal-dialog(role='document')
+              .modal-content
+                .modal-header
+                  button.close(type='button', data-dismiss='modal', aria-label='Close')
+                    span(aria-hidden='true') ×
+                  h4#myModalLabel.modal-title Тэмдэглэсэн газар хадгалах
+                .modal-body
+                  p
+                    | Та шинээр тэмдэглэсэн газрын нэрийг оруулна уу!
+                  input#newroad.form-control(type='text', name='newroad', placeholder='Тэмдэглэсэн газрын нэр')
+                  br
+                .modal-footer
+                  button.btn.btn-default(type='button', data-dismiss='modal') Хаах
+                  button#saveroad.btn.btn-primary(type='submit') Хадгалах
+          .col-md-2.col-sm-2.col-xs-12.group
+            .col-md-12.header
+              button#addroad.btn.btn-success.def-btn.icon-group(type='button')
+                span.glyphicon.glyphicon-plus
+                |   Зам тэмдэглэх
+            .col-md-12
+              center
+                p ТЭМДЭГЛЭСЭН ЗАМУУД
+              br
+              ul#roadnames
+                each place in markedplaces
+                  li.pllnk 
+                    a(href='#{place.OriginLat}?#{place.OriginLng}?#{place.DestinationLat}?#{place.DestinationLng}') #{place.Name}
+          .col-md-10.col-sm-10.col-xs-12.glmap
+            #map
+      #chat
+        .title
+          img.chat(src='../images/chat-icon.png')
+          span#spanUser #{admin.Lastname.substr(0, 1)}.#{admin.Firstname}
+          a#chatmini _
+      script(src='/javascripts/jquery.min.js')
+      script(src='/javascripts/bootstrap.min.js')
+      script(src="/socket.io/socket.io.js")
+      script(type='text/javascript').
+        $(document).ready(function() {
+        $('.drop-menu-btn').click(function() {
+        $('.menu').slideToggle();
+        });
+        });
+        var checkDraw = false;
+        var lat = 37.772;
+        var lng = -122.214;
+        var points = new Array();
+        function initialize() {
+          var mapCanvas = document.getElementById('map');
+          var mapOptions = {
+            center: new google.maps.LatLng(44.5403, -78.5463),
+            zoom: 12,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+          }
+          var map = new google.maps.Map(mapCanvas, mapOptions)
+        }
+        var directionsDisplay = new google.maps.DirectionsRenderer;
+        var directionsService = new google.maps.DirectionsService;
+        map_marker = new google.maps.Marker({position: {lat: lat, lng: lng}, map: map});
+        map_marker.setMap(map);
+        var geocoder = new google.maps.Geocoder();
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 12,
+          center: {lat: 47.917737, lng: 106.920597}
+        });
+        directionsDisplay.setMap(map);
+        var start = {lat: 47.917737, lng: 106.920597};
+        var end = {lat: 48.917737, lng: 107.920597};
+        new LongClick(map, 500);
+        function LongClick(map, length) {
+          this.length_ = length;
+          var me = this;
+          me.map_ = map;
+          google.maps.event.addListener(map, 'mousedown', function(e) { me.onMouseDown_(e) });
+          google.maps.event.addListener(map, 'mouseup', function(e) { me.onMouseUp_(e) });
+        }
+        LongClick.prototype.onMouseUp_ = function(e) {
+          var now = +new Date;
+          if (now - this.down_ > this.length_) {
+          google.maps.event.trigger(this.map_, 'longpress', e);
+          }
+        }
+        LongClick.prototype.onMouseDown_ = function() {
+          this.down_ = +new Date;
+        }
+        var lgClickCounter = 0;
+        var markersArray = [];
+        google.maps.event.addListener(map, 'longpress', function(event) {
+          if(checkDraw) {
+            var myLatLng = {lat: event.latLng.lat(), lng: event.latLng.lng()};
+            var marker = new google.maps.Marker({
+            position: myLatLng,
+            map: map,
+            title: 'Test'
+            });
+            markersArray.push(marker);
+            lgClickCounter ++;
+            if (lgClickCounter == 1) {
+              start = myLatLng;
+            }
+            if (lgClickCounter == 2) {
+              end = myLatLng;
+              lgClickCounter = 0;
+              clearOverlays();
+              calculateAndDisplayRoute(directionsService, directionsDisplay);
+            }
+          }
+        });
+        function clearOverlays() {
+          for (var i = 0; i < markersArray.length; i++ ) {
+            markersArray[i].setMap(null);
+          }
+          markersArray.length = 0;
+        }
+        function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+          directionsService.route({
+            origin: new google.maps.LatLng(start),
+            destination: new google.maps.LatLng(end),
+            travelMode: google.maps.TravelMode.WALKING
+          }, 
+          function(response, status) {
+            if (status === google.maps.DirectionsStatus.OK) {
+              directionsDisplay.setDirections(response);
+              var bounds = new google.maps.LatLngBounds();
+              var legs = response.routes[0].legs;
+              for (i = 0; i < legs.length; i ++) {
+                var steps = legs[i].steps;
+                for (j = 0; j < steps.length; j ++) {
+                  var nextSegment = steps[j].path;
+                  for (k = 0; k < nextSegment.length; k ++) {
+                    //- console.log(nextSegment[k].lat());
+                    points.push(nextSegment[k]);
+                    bounds.extend(nextSegment[k]);
+                  }
+                }
+              }
+            } 
+            else {
+              window.alert('Directions request failed due to ' + status);
+            }
+          });
+        }
+        var isSave = true;
+        $('#addroad').click(function() {
+          checkDraw = !checkDraw;
+          if (isSave) {
+            $('#addroad').html('<span class="glyphicon glyphicon-ok"></span>&nbsp;&nbsp;Зам хадгалах');
+            isSave = false;
+          }
+          else {
+            $('#addroad').html('<span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;Зам тэмдэглэх');
+            $('#myModal1').modal('show');
+            isSave = true;
+          }
+          });
+          $('#saveroad').click(function() {
+            var data = {};
+            data.name = $('#newroad').val();
+            data.originLat = start.lat;
+            data.originLng = start.lng;
+            data.destinationLat = end.lat;
+            data.destinationLng = end.lng;
+            $.ajax({
+              type: 'POST',
+              data: JSON.stringify(data),
+              contentType: 'application/json',
+              url: 'http://localhost:3000/road',            
+              success: function(data) {
+                window.location.assign("http://localhost:3000/overlook");
+                console.log('success');
+                console.log(JSON.stringify(data));
+              } 
+            });
+          });
+        $('.pllnk').on('click', 'a', function(e) {
+          e.preventDefault();
+          $('#roadnames li a').removeClass('active');
+          $(this).addClass('active');
+          var url = $(this).attr('href');
+          var partsArray = url.split('?');
+          start = {lat: parseFloat(partsArray[0]), lng: parseFloat(partsArray[1])};
+          end = {lat: parseFloat(partsArray[2]), lng: parseFloat(partsArray[3])};
+          clearOverlays();
+          calculateAndDisplayRoute(directionsService, directionsDisplay);
+        });
+        $('#clsettings').click(function() {
+          //- $('#roadnames li').each(function(index, element) {
+          //-   alert($(element).text());
+          //- });
+        });
+        $('#cllogout').click(function() {
+          for (i = 0; i < points.length; i++) { 
+            if (47.922218 < points[i].lat() && 47.922221 > points[i].lat()) {
+              //- alert(1234);
+            }
+          }
+          $('#clsettings').trigger('click');
+        }); 
+      script.
+        function init() {
+          $('.blind-user').html('<svg height="8" width="8"><circle cx="4" cy="4" r="4" stroke="black" stroke-width="0" fill="#33FF66"></circle></svg>&nbsp;' +  getCookie("username"));
+          if(status != '') {
+            alert('#{status}');
+          }
+          setUsername(getCookie("username"));
+        }
+        function getCookie(cname) {
+          var name = cname + "=";
+          var ca = document.cookie.split(';');
+          for(var i=0; i<ca.length; i++) {
+              var c = ca[i];
+              while (c.charAt(0)==' ') c = c.substring(1);
+              if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+          }
+          return "Сонгогдоогүй";
+        }
+
+        var map_marker;
+        var lineCoordinatesArray = [];
+        function redraw() {
+          map.setCenter({lat: parseFloat(lat), lng : parseFloat(lng), alt: 0})
+          map_marker.setPosition({lat: parseFloat(lat), lng : parseFloat(lng), alt: 0});
+          lineCoordinatesArray.push(new google.maps.LatLng(parseFloat(lat), parseFloat(lng))); 
+          var lineCoordinatesPath = new google.maps.Polyline({
+            path: lineCoordinatesArray,
+            geodesic: true,
+            strokeColor: '#FF0000',
+            strokeOpacity: 1.0,
+            strokeWeight: 2
+          });
+          lineCoordinatesPath.setMap(map);
+        }
+
+        var socket;
+        socket = io();
+
+        function setUsername(myUserName) {
+          socket.emit('set username', myUserName, function(data) { 
+            console.log('emit set username', data); 
+          });
+          console.log('Set user name as ' + myUserName);
+        }
+
+        function appendNewMessage(msg) {
+          if (msg.target == "All") {
+            lat = msg.lat;
+            lng = msg.lng;
+            for (i = 0; i < points.length; i++) { 
+              if (lat - 0.000001 < points[i].lat() && lat + 0.000001> points[i].lat() && lng - 0.000001 < points[i].lng() && lng + 0.000001> points[i].lng()) {
+                console.log(12);
+              }
+              else {
+                console.log(35)
+              }
+            }
+            redraw();
+          } 
+          else {
+          }
+        }
+
+        function appendNewUser(uName, notify) {
+        }
+
+        function handleUserLeft(msg) {
+          console.log("hereglegc garlaa");
+        }
+
+        function selectRoad(msg) {
+          $('#roadnames li').each(function(index, element) {
+            console.log($(element).text().trim().length + " " + msg.name.length);
+            if($(element).text().trim() == msg.name) {
+              $('#roadnames li').removeClass('active');
+              $(element).addClass('active');
+            }
+          });
+          console.log(msg.originLat);
+          start = {lat: parseFloat(msg.originLat), lng: parseFloat(msg.originLng)};
+          end = {lat: parseFloat(msg.destinationLat), lng: parseFloat(msg.destinationLng)};
+          clearOverlays();
+          calculateAndDisplayRoute(directionsService, directionsDisplay);
+        }
+
+        $(function() {      
+          socket.on('userJoined', function(msg) {
+            appendNewUser(msg.userName, true);
+          });
+
+          socket.on('userLeft', function(msg) {
+            handleUserLeft(msg);
+          });
+
+          socket.on('selectroad', function(msg) {
+            selectRoad(msg);
+          });
+
+          socket.on('message', function(msg) {
+            appendNewMessage(msg);
+          });
+
+          socket.on('error', function(msg) {
+            if (msg.userNameInUse) {
+            }
+          });
+        });
+
+

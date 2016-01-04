@@ -1,0 +1,261 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    title Хараагүй хүний хөтөч
+    link(rel='stylesheet', href='/stylesheets/bootstrap-3.3.5-dist/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body(onload='init()')
+    #container 
+      aside.col-md-3.col-sm-2.col-xs-12.sidebar
+        .col-md-12.navbar-fixed-left
+          img#img-logo
+          span#app-name Хараагүй хүний хөтөч 
+          span.fullscreen.glyphicon.glyphicon-menu-hamburger
+        .col-md-12.profile
+          .col-md-4
+            center
+              img.profile-image
+          .col-md-8
+            span
+              b #{admin.Lastname} #{admin.Firstname}
+            br
+            span.user-role АСРАН ХАМГААЛАГЧ
+            br
+            button.btn.btn-info.def-btn(type='button') ЗАСАХ
+        .col-md-12.user-info
+          center
+            span ИДЭВХИТЭЙ БАЙГАА ГИШҮҮН
+            br
+            .blind-user
+              svg(height='8', width='8')
+                circle(cx='4', cy='4', r='4', stroke='black', stroke-width='0', fill='#33FF66')
+              |         &nbspСонгогдоогүй
+        .drop-menu-btn
+          | Үндсэн цэс
+          span.glyphicon.glyphicon-menu-hamburger
+        .col-md-12.menu
+          ul
+            li.active
+              a(href='/home/0')
+                img.icon(src='../images/icon-1-active.png')
+                | Гишүүд
+            li
+              a(href='../overlook')
+                img.icon(src='../images/icon-2-none.png')
+                | Ажиглах
+            li
+              a(href='#')
+                img.icon(src='../images/icon-3-none.png')
+                | Цэс удирдах
+            li
+              a(href='#')
+                img.icon(src='../images/icon-4-none.png')
+                | Захидал
+            li
+              a(href='../intro')
+                img.icon(src='../images/icon-5-none.png')
+                | Танилцуулга     
+      .col-md-9.col-sm-10.col-xs-12.content
+        nav.navbar.navbar-fixed-top
+          .col-md-12.col-sm-12.col-xs-12.navbar-fixed-right.pull-right
+            .col-md-7.col-sm-5.col-xs-0
+            .col-md-5.col-sm-7.col-xs-12.text-right.head-settings
+              | 15:27 
+              span.silvertxt AM   
+              |  23 
+              span.silvertxt 10-Сар 2015 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              input#clsettings.set_icon(type='submit', value='Settings', name='', title='Тохиргоо', data-toggle='tooltip', data-placement='bottom')
+              input#cllogout.log_icon(type='submit', value='LogOut', name='', title='Гарах', data-toggle='tooltip', data-placement='bottom')
+        #sub-content.col-md-12.col-sm-12.col-xs-12
+          // Group add Modal
+          #myModal1.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel')
+            .modal-dialog(role='document')
+              .modal-content
+                form(action='/group', method='POST')
+                  .modal-header
+                    button.close(type='button', data-dismiss='modal', aria-label='Close')
+                      span(aria-hidden='true') ×
+                    h4#myModalLabel.modal-title Бүлэг нэмэх
+                  .modal-body
+                    input.form-control(type='text', name='groupName', placeholder='Бүлгийн нэр')
+                    br
+                    textarea.form-control(rows='3', name='groupDescription', placeholder='Тайлбар')
+                  .modal-footer
+                    button.btn.btn-default(type='button', data-dismiss='modal') Хаах
+                    input.btn.btn-primary(type='submit', value='Хадгалах') 
+          // User add Modal
+          #myModal2.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel')
+            .modal-dialog(role='document')
+              .modal-content
+                form(action='/user/#{grid}', method='POST')
+                  .modal-header
+                    button.close(type='button', data-dismiss='modal', aria-label='Close')
+                      span(aria-hidden='true') ×
+                    h4#myModalLabel.modal-title Гишүүн нэмэх
+                  .modal-body
+                    p
+                      | Та 
+                      b Утасны код
+                      |  гэсэн талбарт өөрийн хянах хараагүй хүний утасны IMIE кодыг оруулж өгнө үү!
+                    input.form-control(type='text', name='newUser', placeholder='Утасны код')
+                    br
+                    p
+                      | Бүлэг сонгоно уу!
+                    select.form-control(name='group')
+                      each group in groups
+                        if grid != 0 
+                          if grid == group.Id
+                            option(value='#{group.Id}') #{group.Name} 
+                        else
+                          option(value='#{group.Id}') #{group.Name} 
+                  .modal-footer
+                    button.btn.btn-default(type='button', data-dismiss='modal') Хаах
+                    button.btn.btn-primary(type='submit') Хадгалах
+          .col-md-2.col-sm-2.col-xs-12.group
+            .col-md-12.header
+              button.btn.btn-success.def-btn.icon-group(type='button' data-toggle='modal' data-target='#myModal1') 
+                span.glyphicon.glyphicon-plus
+                |   Бүлэг үүсгэх
+            .col-md-12
+              center
+                p БҮЛГҮҮД
+              br
+              ul
+                if grid == 0 
+                  li.active 
+                    a(href='/home/0') 
+                      span.badge.pull-right 42
+                      Бүгд
+                else
+                  li 
+                    a(href='/home/0') Бүгд
+                each group in groups
+                  if grid == group.Id
+                    li.active
+                     a(href='/home/#{group.Id}') #{group.Name}
+                  else 
+                    li 
+                      a(href='/home/#{group.Id}') #{group.Name}
+          .col-md-10.col-sm-10.col-xs-12.users-data
+            .col-md-12.col-xs-12.header
+              .col-md-8.col-sm-8.col-xs-6.control-left
+                button.btn.btn-info.def-btn(type='button' data-toggle='modal' data-target='#myModal2') Нэмэх
+              .col-md-4.col-sm-4.col-xs-6.control-right
+                button.btn.btn-info.def-btn(type='button') «
+                button.btn.btn-info.def-btn(type='button') »
+            .table-responsive
+              table.table.table-hover
+                th #
+                th ОВОГ НЭР
+                th НАС
+                th ХҮЙС
+                th УТАСНЫ ДУГААР
+                th КОД
+                th ҮЙЛДЭЛ
+                each user in users
+                  tr
+                    td #{user.Id}
+                    td #{user.Lastname.substr(0, 1)}.#{user.Firstname}
+                    td #{user.Dob}
+                    td 
+                      if user.Gender == 1 
+                        эм
+                      else
+                        эр
+                    td #{user.Phonenumber}
+                    td #{user.IdCode}
+                    td
+                      a.clselect(href='#{user.Id}?#{user.Lastname.substr(0, 1)}.#{user.Firstname}', data-toggle='tooltip', data-placement='top', title='Сонгох')
+                        span.glyphicon.glyphicon-star-empty(aria-hidden='true')&nbsp
+                      a.cledit(href='#', data-toggle='tooltip', data-placement='top', title='Засах')
+                        span.glyphicon.glyphicon-pencil(aria-hidden='true')&nbsp
+                      a.cldelete(href='#{user.Id}?#{user.Lastname.substr(0, 1)}.#{user.Firstname}', data-toggle='tooltip', data-placement='top', title='Устгах')
+                        span.glyphicon.glyphicon-trash(aria-hidden='true')  
+      #chat
+        .title
+          img.chat(src='../images/chat-icon.png')
+          span#spanUser #{admin.Lastname.substr(0, 1)}.#{admin.Firstname}
+          a#chatmini _
+    script(src='/javascripts/jquery.min.js')
+    script(src='/javascripts/bootstrap.min.js')
+    script(type='text/javascript').
+      $(document).ready(function() {
+        $('[data-toggle="tooltip"]').tooltip();
+        $('.drop-menu-btn').click(function() {
+          $('.menu').slideToggle();
+        });
+        $('.clselect').on('click', function(e) {
+            e.preventDefault();
+            var url = $(this).attr('href');
+            var partsArray = url.split('?');
+            $('.blind-user').html('<svg height="8" width="8"><circle cx="4" cy="4" r="4" stroke="black" stroke-width="0" fill="#33FF66"></circle></svg>&nbsp;' +  partsArray[1]);
+            setCookie("username", partsArray[1], 365);
+            var data = {};
+            data.userid = partsArray[0];
+            $.ajax({
+              type: 'POST',
+              data: JSON.stringify(data),
+              contentType: 'application/json',
+              url: 'http://localhost:3000/changeuser',            
+              success: function(data) {
+                console.log('success');
+                console.log(JSON.stringify(data));
+              } 
+            });
+        });
+      });
+      $('.cldelete').on('click', function(e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        var partsArray = url.split('?');
+        if (confirm("Та " + partsArray[1] + " хэрэглэгчийг устгахдаа итгэлтэй байна уу!") == true) {
+          var data = {};
+          data.userid = partsArray[0];
+          $.ajax({
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            url: 'http://localhost:3000/deleteuser',            
+            success: function(data) {
+              window.location.assign("http://localhost:3000/home/0");
+              console.log('success');
+              console.log(JSON.stringify(data));
+            } 
+          });
+        } 
+        else {
+        }
+      });
+      $('#clsettings').click(function() {
+        console.log("test");
+      });
+      $('#cllogout').click(function() {
+        document.cookie = "username=Сонгогдоогүй;path=/;"
+        window.location.assign("http://localhost:3000");
+      });
+    script.
+      function init() {
+        $('.blind-user').html('<svg height="8" width="8"><circle cx="4" cy="4" r="4" stroke="black" stroke-width="0" fill="#33FF66"></circle></svg>&nbsp;' +  getCookie("username"));
+        if(status != '') {
+          alert('#{status}');  
+        }
+
+      }
+      function setCookie(cname, cvalue, exdays) {
+        var d = new Date();
+        d.setTime(d.getTime() + (exdays*24*60*60*1000));
+        var expires = "expires = " + d.toUTCString();
+        document.cookie = cname + "=" + cvalue + ";path=/;";
+      }
+      function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i = 0; i < ca.length; i ++) {
+          var c = ca[i];
+          while (c.charAt(0) == ' ') c = c.substring(1);
+          if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+        }
+        return "Сонгогдоогүй";
+      }
